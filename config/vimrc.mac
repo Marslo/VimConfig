@@ -1,9 +1,9 @@
 " =============================================================================
-"      FileName: vimrc.mac
+"      FileName: .vimrc
 "        Author: marslo.jiao@gmail.com
 "       Created: 2010-10
 "       Version: 0.0.24
-"    LastChange: 2020-09-04 17:15:02
+"    LastChange: 2020-10-20 21:38:49
 " =============================================================================
 
 set maxmempattern=5000
@@ -48,7 +48,7 @@ Bundle 'Yggdroot/indentLine'
 Bundle 'kien/ctrlp.vim'
 Bundle 'sjl/gundo.vim'
 Bundle 'majutsushi/tagbar'
-Bundle 'dantezhu/authorinfo'
+Bundle 'marslo/authorinfo'
 Bundle 'Marslo/EnhCommentify.vim'
 Bundle 'Marslo/auto-pairs'
 Bundle 'tomtom/tlib_vim'
@@ -76,7 +76,7 @@ Bundle 'pyflakes/pyflakes'
 Bundle 'python_match.vim'
 Bundle 'vim-python/python-syntax'
 Bundle 'davidhalter/jedi-vim'
-Bundle 'mfukar/robotframework-vim'
+" Bundle 'mfukar/robotframework-vim'
 " Web design
 Bundle 'tpope/vim-surround'
 Bundle 'valloric/MatchTagAlways'
@@ -169,6 +169,33 @@ function! ToggleWindowHorizontalVerticalSplit()
   endif
 endfunction
 nnoremap <silent> <leader>wt :call ToggleWindowHorizontalVerticalSplit()<cr>
+
+function! GetFiletypes()
+  " https://vi.stackexchange.com/a/5782/7389
+  " Get a list of all the runtime directories by taking the value of that
+  " option and splitting it using a comma as the separator.
+  let rtps = split(&runtimepath, ",")
+  " This will be the list of filetypes that the function returns
+  let filetypes = []
+
+  " Loop through each individual item in the list of runtime paths
+  for rtp in rtps
+    let syntax_dir = rtp . "/syntax"
+    " Check to see if there is a syntax directory in this runtimepath.
+    if (isdirectory(syntax_dir))
+      " Loop through each vimscript file in the syntax directory
+      for syntax_file in split(glob(syntax_dir . "/*.vim"), "\n")
+        " Add this file to the filetypes list with its everything
+        " except its name removed.
+        call add(filetypes, fnamemodify(syntax_file, ":t:r"))
+      endfor
+    endif
+  endfor
+
+  " This removes any duplicates and returns the resulting list.
+  " NOTE: This might not be the best way to do this, suggestions are welcome.
+  return uniq(sort(filetypes))
+endfunction
 
 if isdirectory(expand(bud . 'MarsloFunc'))
   command! GetVim :call marslofunc#GetVim()<CR>
@@ -403,7 +430,6 @@ inoremap <leader>w <C-O>:w<CR>
 nnoremap <leader>G :%s///gn<CR>
 nnoremap <leader>idl :IndentLineEnable<CR>
 
-nnoremap <leader>zil :g/^/ s//\=line('.').' '/<CR>    " Insert line number
 nnoremap <leader>zcm :%s/<C-v><CR>/\r/g<CR>           " Convert  to new line
 nnoremap <leader>zwl :%s///gn<CR>                     " Show the matches numbers (wc -l)
 nnoremap <leader>zdm :%s/<C-v><CR>//ge<CR>            " Delete 
@@ -414,6 +440,7 @@ nnoremap <leader>zdd :%s/ / /g<CR>                    " Delete   (dot)
 nnoremap <leader>zds :%s/^<span.*span>//g<CR>         " Delete span tag
 nnoremap <leader>zdi :%s/^\s\+//<CR>                  " Delete indent spaces
 nnoremap <leader>zid i•<ESC>                          " Insert •
+nnoremap <leader>zil :g/^/ s//\=line('.').' '/<CR>    " Insert line number
 nnoremap <leader>cr 0yt=A<C-r>=<C-r>"<CR><Esc>        " Cacular expr
 
 if version > 703
